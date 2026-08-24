@@ -22,19 +22,41 @@ const game = {
     logs: []
 };
 
-// DOM elements
-const hp1 = document.getElementById('hp1');
-const hp2 = document.getElementById('hp2');
-const hpText1 = document.getElementById('hp-text1');
-const hpText2 = document.getElementById('hp-text2');
-const energy1 = document.getElementById('energy1');
-const energy2 = document.getElementById('energy2');
-const status = document.getElementById('status');
-const logDiv = document.getElementById('log');
-const btnAttack = document.getElementById('btn-attack');
-const btnSpecial = document.getElementById('btn-special');
-const btnHeal = document.getElementById('btn-heal');
-const btnReset = document.getElementById('btn-reset');
+// DOM elements - will be initialized when DOM is ready
+let hp1, hp2, hpText1, hpText2, energy1, energy2, status, logDiv, btnAttack, btnSpecial, btnHeal, btnReset;
+
+function initDOM() {
+    hp1 = document.getElementById('hp1');
+    hp2 = document.getElementById('hp2');
+    hpText1 = document.getElementById('hp-text1');
+    hpText2 = document.getElementById('hp-text2');
+    energy1 = document.getElementById('energy1');
+    energy2 = document.getElementById('energy2');
+    status = document.getElementById('status');
+    logDiv = document.getElementById('log');
+    btnAttack = document.getElementById('btn-attack');
+    btnSpecial = document.getElementById('btn-special');
+    btnHeal = document.getElementById('btn-heal');
+    btnReset = document.getElementById('btn-reset');
+    
+    // Event listeners
+    btnAttack.addEventListener('click', attack);
+    btnSpecial.addEventListener('click', specialAttack);
+    btnHeal.addEventListener('click', heal);
+    btnReset.addEventListener('click', resetGame);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (!game.gameOver) {
+            if (game.currentPlayer === 'gleb') {
+                if (e.key === '1' || e.key === 'q') attack();
+                if (e.key === '2' || e.key === 'w') specialAttack();
+                if (e.key === '3' || e.key === 'e') heal();
+            }
+        }
+        if (e.key === '0' || e.key === 'r') resetGame();
+    });
+}
 
 // Update UI
 function updateUI() {
@@ -245,24 +267,9 @@ function resetGame() {
     enableActionButtons();
 }
 
-// Event listeners
-btnAttack.addEventListener('click', attack);
-btnSpecial.addEventListener('click', specialAttack);
-btnHeal.addEventListener('click', heal);
-btnReset.addEventListener('click', resetGame);
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (!game.gameOver) {
-        if (game.currentPlayer === 'gleb') {
-            if (e.key === '1' || e.key === 'q') attack();
-            if (e.key === '2' || e.key === 'w') specialAttack();
-            if (e.key === '3' || e.key === 'e') heal();
-        }
-    }
-    if (e.key === '0' || e.key === 'r') resetGame();
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initDOM();
+    resetGame();
+    enableActionButtons();
 });
-
-// Initialize game
-resetGame();
-enableActionButtons();
