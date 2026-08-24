@@ -286,10 +286,10 @@
         <div class="buttons-section">
             <div class="game-status" id="status">Начни битву!</div>
             <div class="action-buttons">
-                <button class="btn-attack" id="btn-attack">⚡ Атака</button>
-                <button class="btn-special" id="btn-special">🔥 Спец. удар</button>
-                <button class="btn-heal" id="btn-heal">💚 Исцеление</button>
-                <button class="btn-reset" id="btn-reset">🔄 Новая игра</button>
+                <button class="btn-attack" id="btn-attack" onclick="attack()">⚡ Атака</button>
+                <button class="btn-special" id="btn-special" onclick="specialAttack()">🔥 Спец. удар</button>
+                <button class="btn-heal" id="btn-heal" onclick="heal()">💚 Исцеление</button>
+                <button class="btn-reset" id="btn-reset" onclick="resetGame()">🔄 Новая игра</button>
             </div>
         </div>
 
@@ -299,22 +299,8 @@
     <script>
         // Game state
         const game = {
-            gleb: {
-                name: 'Глеб',
-                maxHp: 100,
-                hp: 100,
-                energy: 100,
-                maxEnergy: 100,
-                emoji: '🧠'
-            },
-            kostya: {
-                name: 'Костя',
-                maxHp: 100,
-                hp: 100,
-                energy: 100,
-                maxEnergy: 100,
-                emoji: '💪'
-            },
+            gleb: { name: 'Глеб', maxHp: 100, hp: 100, energy: 100, maxEnergy: 100, emoji: '🧠' },
+            kostya: { name: 'Костя', maxHp: 100, hp: 100, energy: 100, maxEnergy: 100, emoji: '💪' },
             currentPlayer: 'gleb',
             gameOver: false,
             winner: null,
@@ -335,33 +321,21 @@
         const btnHeal = document.getElementById('btn-heal');
         const btnReset = document.getElementById('btn-reset');
 
-        // Update UI
         function updateUI() {
             const hp1Percent = (game.gleb.hp / game.gleb.maxHp) * 100;
             const hp2Percent = (game.kostya.hp / game.kostya.maxHp) * 100;
-            
             hp1.style.width = Math.max(0, hp1Percent) + '%';
             hp2.style.width = Math.max(0, hp2Percent) + '%';
-            
             hpText1.textContent = `${Math.max(0, game.gleb.hp)} / ${game.gleb.maxHp} HP`;
             hpText2.textContent = `${Math.max(0, game.kostya.hp)} / ${game.kostya.maxHp} HP`;
-            
             energy1.textContent = `⚡ Энергия: ${game.gleb.energy}`;
             energy2.textContent = `⚡ Энергия: ${game.kostya.energy}`;
             
             if (game.gameOver) {
-                if (game.winner === 'gleb') {
-                    status.innerHTML = `<span class="status-gleb">🎉 Глеб победил! 🎉</span>`;
-                } else {
-                    status.innerHTML = `<span class="status-kostya">🎉 Костя победил! 🎉</span>`;
-                }
+                status.innerHTML = game.winner === 'gleb' ? '<span class="status-gleb">🎉 Глеб победил! 🎉</span>' : '<span class="status-kostya">🎉 Костя победил! 🎉</span>';
                 disableAllButtons();
             } else {
-                if (game.currentPlayer === 'gleb') {
-                    status.innerHTML = `<span class="status-gleb">Ход Глеба 🧠</span>`;
-                } else {
-                    status.innerHTML = `<span class="status-kostya">Ход Костьи 💪</span>`;
-                }
+                status.innerHTML = game.currentPlayer === 'gleb' ? '<span class="status-gleb">Ход Глеба 🧠</span>' : '<span class="status-kostya">Ход Костьи 💪</span>';
             }
         }
 
@@ -371,7 +345,6 @@
             entry.textContent = message;
             logDiv.appendChild(entry);
             logDiv.scrollTop = logDiv.scrollHeight;
-            game.logs.push(message);
         }
 
         function disableAllButtons() {
@@ -382,7 +355,6 @@
 
         function enableActionButtons() {
             const player = game.currentPlayer === 'gleb' ? game.gleb : game.kostya;
-            
             btnAttack.disabled = player.energy < 15;
             btnSpecial.disabled = player.energy < 40;
             btnHeal.disabled = player.energy < 20 || player.hp === player.maxHp;
@@ -391,154 +363,94 @@
         function attack() {
             const attacker = game.currentPlayer === 'gleb' ? game.gleb : game.kostya;
             const defender = game.currentPlayer === 'gleb' ? game.kostya : game.gleb;
-            
-            if (attacker.energy < 15) {
-                addLog('⚠️ Недостаточно энергии!', 'normal');
-                return;
-            }
-            
+            if (attacker.energy < 15) { addLog('⚠️ Недостаточно энергии!'); return; }
             const damage = Math.floor(Math.random() * 15) + 10;
             attacker.energy -= 15;
             defender.hp -= damage;
-            
             addLog(`${attacker.emoji} ${attacker.name} атакует! 💥 Урон: ${damage}`, 'attack');
-            
             if (defender.hp <= 0) {
                 defender.hp = 0;
                 game.gameOver = true;
                 game.winner = game.currentPlayer;
                 addLog(`💀 ${defender.name} повержен!`, 'attack');
             }
-            
             updateUI();
-            if (!game.gameOver) {
-                switchTurn();
-            }
+            if (!game.gameOver) switchTurn();
         }
 
         function specialAttack() {
             const attacker = game.currentPlayer === 'gleb' ? game.gleb : game.kostya;
             const defender = game.currentPlayer === 'gleb' ? game.kostya : game.gleb;
-            
-            if (attacker.energy < 40) {
-                addLog('⚠️ Недостаточно энергии!', 'normal');
-                return;
-            }
-            
+            if (attacker.energy < 40) { addLog('⚠️ Недостаточно энергии!'); return; }
             const damage = Math.floor(Math.random() * 25) + 25;
             attacker.energy -= 40;
             defender.hp -= damage;
-            
-            addLog(`${attacker.emoji} ${attacker.name} использует спец. удар! 🔥 Урон: ${damage}`, 'special');
-            
+            addLog(`${attacker.emoji} ${attacker.name} спец. удар! 🔥 Урон: ${damage}`, 'special');
             if (defender.hp <= 0) {
                 defender.hp = 0;
                 game.gameOver = true;
                 game.winner = game.currentPlayer;
                 addLog(`💀 ${defender.name} повержен!`, 'special');
             }
-            
             updateUI();
-            if (!game.gameOver) {
-                switchTurn();
-            }
+            if (!game.gameOver) switchTurn();
         }
 
         function heal() {
             const player = game.currentPlayer === 'gleb' ? game.gleb : game.kostya;
-            
-            if (player.energy < 20) {
-                addLog('⚠️ Недостаточно энергии!', 'normal');
-                return;
-            }
-            
-            if (player.hp === player.maxHp) {
-                addLog('⚠️ HP уже на максимуме!', 'normal');
-                return;
-            }
-            
-            const healing = 30;
+            if (player.energy < 20) { addLog('⚠️ Недостаточно энергии!'); return; }
+            if (player.hp === player.maxHp) { addLog('⚠️ HP на максимуме!'); return; }
             player.energy -= 20;
-            player.hp = Math.min(player.hp + healing, player.maxHp);
-            
-            addLog(`${player.emoji} ${player.name} использует исцеление! 💚 Восстановление: ${healing}`, 'heal');
-            
+            player.hp = Math.min(player.hp + 30, player.maxHp);
+            addLog(`${player.emoji} ${player.name} исцеляется! 💚 +30 HP`, 'heal');
             updateUI();
             switchTurn();
         }
 
         function switchTurn() {
             game.currentPlayer = game.currentPlayer === 'gleb' ? 'kostya' : 'gleb';
-            
             const player = game.currentPlayer === 'gleb' ? game.gleb : game.kostya;
             player.energy = Math.min(player.energy + 15, player.maxEnergy);
-            
             updateUI();
             enableActionButtons();
-            
-            if (game.currentPlayer === 'kostya' && !game.gameOver) {
-                setTimeout(aiTurn, 1000);
-            }
+            if (game.currentPlayer === 'kostya' && !game.gameOver) setTimeout(aiTurn, 1000);
         }
 
         function aiTurn() {
             if (game.gameOver) return;
-            
             const player = game.kostya;
             const opponent = game.gleb;
+            let action = 'attack';
+            if (player.hp < 30 && player.energy >= 20) action = 'heal';
+            else if (opponent.hp > 50 && player.energy >= 40) action = Math.random() > 0.5 ? 'special' : 'attack';
+            else if (player.energy < 15) action = 'wait';
             
-            let action;
-            
-            if (player.hp < 30 && player.energy >= 20) {
-                action = 'heal';
-            } else if (opponent.hp > 50 && player.energy >= 40) {
-                action = Math.random() > 0.5 ? 'special' : 'attack';
-            } else if (player.energy >= 15) {
-                action = 'attack';
-            } else {
-                action = 'wait';
-            }
-            
-            if (action === 'attack') {
-                attack();
-            } else if (action === 'special') {
-                specialAttack();
-            } else if (action === 'heal') {
-                heal();
-            } else {
+            if (action === 'attack') attack();
+            else if (action === 'special') specialAttack();
+            else if (action === 'heal') heal();
+            else {
                 game.kostya.energy = Math.min(game.kostya.energy + 15, game.kostya.maxEnergy);
-                addLog(`${game.kostya.emoji} ${game.kostya.name} восстанавливает энергию...`);
+                addLog(`⚡ Костя восстанавливает энергию...`);
                 updateUI();
                 switchTurn();
             }
         }
 
         function resetGame() {
-            game.gleb.hp = game.gleb.maxHp;
-            game.gleb.energy = game.gleb.maxEnergy;
-            game.kostya.hp = game.kostya.maxHp;
-            game.kostya.energy = game.kostya.maxEnergy;
+            game.gleb.hp = 100;
+            game.gleb.energy = 100;
+            game.kostya.hp = 100;
+            game.kostya.energy = 100;
             game.currentPlayer = 'gleb';
             game.gameOver = false;
             game.winner = null;
-            game.logs = [];
-            
             logDiv.innerHTML = '';
-            addLog('🎮 Новая игра начинается!');
-            
+            addLog('🎮 Новая игра!');
             updateUI();
             enableActionButtons();
         }
 
-        // Event listeners
-        btnAttack.addEventListener('click', attack);
-        btnSpecial.addEventListener('click', specialAttack);
-        btnHeal.addEventListener('click', heal);
-        btnReset.addEventListener('click', resetGame);
-
-        // Initialize
         resetGame();
-        enableActionButtons();
     </script>
 </body>
 </html>
